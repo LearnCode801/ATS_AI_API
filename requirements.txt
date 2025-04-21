@@ -15,7 +15,7 @@ Pillow==10.0.0
 # poppler-utils==0.1.0  # Required by pdf2image
 
 # Image processing
-Pillow==10.1.0  # For image handling
+# Pillow==10.1.0  # For image handling
 
 # AI/ML
 google-generativeai==0.3.2
