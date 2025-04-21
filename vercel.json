@@ -3,10 +3,7 @@
   "builds": [
     {
       "src": "api/index.py",
-      "use": "@vercel/python",
-      "config": {
-        "buildCommand": "pip install -r requirements.txt && apt-get update && apt-get install -y poppler-utils"
-      }
+      "use": "@vercel/python"
     }
   ],
   "routes": [
