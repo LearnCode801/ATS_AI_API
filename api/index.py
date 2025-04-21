@@ -493,6 +493,8 @@ def prepare_vision_content(pdf_bytes, job_description=None, prompt=None, include
         if not images:
             print("Warning: Failed to extract images from PDF")
         else:
+            print("DONE!! pdf2images")
+            print(len(images))
             for i, img in enumerate(images[:3]):
                 img_byte_arr = io.BytesIO()
                 img.save(img_byte_arr, format='JPEG')
