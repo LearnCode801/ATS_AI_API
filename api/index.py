@@ -15,7 +15,8 @@ import pdf2image
 import fitz  # PyMuPDF
 import google.generativeai as genai
 import re
-
+import fitz  # PyMuPDF
+from PIL import Image
 # Load environment variables
 load_dotenv()
 
@@ -427,12 +428,43 @@ def extract_text_from_pdf(pdf_bytes):
         print(f"Error extracting text from PDF: {str(e)}")
         return ""
 
+# def convert_pdf_to_images(pdf_bytes, max_pages=5):
+#     """Convert PDF pages to images, limited to max_pages"""
+#     try:
+#         images = pdf2image.convert_from_bytes(pdf_bytes,poppler_path='poppler/bin')
+#         # Limit to max_pages
+#         return images[:max_pages]
+#     except Exception as e:
+#         print(f"Error converting PDF to images: {str(e)}")
+#         return []
+
+
+
 def convert_pdf_to_images(pdf_bytes, max_pages=5):
     """Convert PDF pages to images, limited to max_pages"""
     try:
-        images = pdf2image.convert_from_bytes(pdf_bytes,poppler_path='poppler/bin')
-        # Limit to max_pages
-        return images[:max_pages]
+        # Open PDF from bytes
+        pdf_document = fitz.open(stream=pdf_bytes, filetype="pdf")
+        
+        # Determine number of pages to process
+        num_pages = min(len(pdf_document), max_pages)
+        
+        images = []
+        for page_num in range(num_pages):
+            page = pdf_document[page_num]
+            # Set resolution with matrix (zoom factor)
+            zoom = 2.0  # Adjust for higher/lower resolution
+            matrix = fitz.Matrix(zoom, zoom)
+            
+            # Get pixmap (image)
+            pix = page.get_pixmap(matrix=matrix)
+            
+            # Convert to PIL Image
+            img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+            images.append(img)
+        
+        pdf_document.close()
+        return images
     except Exception as e:
         print(f"Error converting PDF to images: {str(e)}")
         return []
