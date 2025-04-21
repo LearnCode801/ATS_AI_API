@@ -430,7 +430,7 @@ def extract_text_from_pdf(pdf_bytes):
 def convert_pdf_to_images(pdf_bytes, max_pages=5):
     """Convert PDF pages to images, limited to max_pages"""
     try:
-        images = pdf2image.convert_from_bytes(pdf_bytes)
+        images = pdf2image.convert_from_bytes(pdf_bytes,poppler_path='poppler/bin')
         # Limit to max_pages
         return images[:max_pages]
     except Exception as e:
