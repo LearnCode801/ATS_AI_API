@@ -10,7 +10,7 @@ python-dotenv==1.0.0
 PyMuPDF==1.23.7  # For extracting text from PDFs (fitz)
 pdf2image==1.16.3  # For converting PDFs to images
 poppler-utils==0.1.0  # Required by pdf2image
-poppler
+
 # Image processing
 Pillow==10.1.0  # For image handling
 
