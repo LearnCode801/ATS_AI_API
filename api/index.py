@@ -72,6 +72,16 @@ class ATSOnlyAnalysis(BaseModel):
     categories: List[CategoryAnalysis]
     potential_improvement: Optional[int] = None
 
+
+
+# Define request model for better validation
+class ResumeSectionRequest(BaseModel):
+    sectionName: str
+    questionAnswers: Dict[str, str]
+
+# Define response model
+class ResumeSectionResponse(BaseModel):
+    sectionData: Any
 # Enhanced ReAct Chain Prompts
 
 # Step 1: Initial Extraction and Structure Analysis (shared by both modes)
@@ -413,6 +423,91 @@ Format your response following this exact structure:
 }
 ```
 """
+
+
+section_prompts = {
+    "header": (
+        "Extract the following attributes:\n"
+        "- name\n"
+        "- title\n"
+        "- email\n"
+        "- phone\n"
+        "- location\n"
+        "- links (list of objects with text and url fields)\n\n"
+    ),
+    "summary": (
+        "Extract the following attributes:\n"
+        "- summary (a concise professional summary, 2-3 sentences)\n"
+        "- objective (a career objective statement, if available)\n\n"
+    ),
+    "education": (
+        "Extract the following attributes:\n"
+        "- id\n"
+        "- institution\n"
+        "- location \n"
+        "- degree\n"
+        "- gpa (if available)\n"
+        "- startDate\n"
+        "- endDate\n\n"
+    ),
+    "experience": (
+        "Extract the following attributes:\n"
+        "- title\n"
+        "- company\n"
+        "- id\n"
+        "- startDate\n"
+        "- endDate\n"
+        "- link\n"
+        "- points (list of bullet points in detail each point of one line)\n\n"
+    ),
+    "projects": (
+        "Extract the following attributes:\n"
+        "- projectTitle\n"
+        "- description\n"
+        "- technologies (list)\n"
+        "- role\n"
+        "- startDate\n"
+        "- endDate\n\n"
+    ),
+    "skills": (
+        "Extract the following attributes:\n"
+        "- softSkills (list)\n"
+        "- languages (note these are computer languages) (list)\n"
+        "- platforms (list)\n"
+        "- frameworks (list)\n"
+        "- tools (list)\n\n"
+    ),
+    "certificates": (
+        "Extract the following attributes:\n"
+        "- id\n"
+        "- name\n"
+        "- link {text, url}}\n"
+        "- date\n"
+        "- description\n\n"
+        "Note: You return only one object that with most appropriate certification"
+    ),
+    "achievements": (
+        "Extract the following attributes:\n"
+        "- title\n"
+        "- description\n"
+        "- date (if available)\n\n"
+    ),
+    "interests": (
+        "Extract the following attributes:\n"
+        "- interests (list of interests or hobbies)\n\n"
+    ),
+    "languages": (
+        "Extract the following attributes:\n"
+        "- language\n"
+        "- proficiency\n\n"
+    ),
+    "customSections": (
+        "Extract the following attributes:\n"
+        "- id\n"
+        "- title\n"
+        "- content\n"
+    )
+}
 
 def extract_text_from_pdf(pdf_bytes):
     """Extract text from all pages of a PDF"""
@@ -765,6 +860,43 @@ async def root():
             }
         ]
     }
+
+
+@app.post("/generate_resume_section", response_model=ResumeSectionResponse)
+async def generate_resume_section(request: ResumeSectionRequest):
+    try:
+        section_name = request.sectionName
+        question_answers = request.questionAnswers
+
+        if section_name not in section_prompts:
+            raise HTTPException(status_code=400, detail=f"Unsupported sectionName: {section_name}")
+
+        qa_string = "\n".join([
+            f"Q: {q}\nA: {a if a.strip() else 'No answer provided.'}"
+            for q, a in question_answers.items()
+        ])
+
+        prompt = (
+            f"You are a resume-building assistant. Based on the answers related to the '{section_name}' section, "
+            f"extract structured data in JSON format with the following attributes. "
+            f"If any attribute is not available, set its value to null.\n\n"
+            f"{section_prompts[section_name]}"
+            f"Answers:\n{qa_string}\n\n"
+            "Output a list of one dictionary item (even if you find multiples but return one). Return only one in the JSON."
+        )
+
+        m1 = genai.GenerativeModel('gemini-1.5-flash-latest')
+        response = m1.generate_content(prompt)
+        raw_text = response.text.strip()
+        cleaned_text = re.sub(r"```json|```", "", raw_text, flags=re.IGNORECASE).strip()
+
+        structured_data = json.loads(cleaned_text)
+        
+        return {"sectionData": structured_data}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 
 if __name__ == "__main__":
     import uvicorn
