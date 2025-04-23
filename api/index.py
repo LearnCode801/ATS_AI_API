@@ -427,13 +427,11 @@ Format your response following this exact structure:
 
 section_prompts = {
     "header": (
-        "Extract the following attributes:\n"
-        "- name\n"
-        "- title\n"
-        "- email\n"
-        "- phone\n"
-        "- location\n"
-        "- links (list of objects with text and url fields)\n\n"
+        "Extract the following attributes from the professional information provided:\n"
+        "- role (the current professional role or area of expertise)\n"
+        "- education (the most significant educational qualifications, including degrees and majors)\n"
+        "- affiliation (institutions or organizations the person is affiliated with)\n\n"
+        "Format these as a single cohesive object. If any attribute is not available, set its value to null.\n"
     ),
     "summary": (
         "Extract the following attributes:\n"
