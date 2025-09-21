@@ -1,6 +1,6 @@
 # ATS Resume Analyzer API
 
-[![Demo Video](https://img.shields.io/badge/🎥%20Demo-Video-blue?style=flat-square&logo=googledrive)](https://drive.google.com/file/d/1kAJjkmc476nPm8HNkAvzGTN_YPevHOfD/view?usp=sharing)
+[![Demo Video](https://img.shields.io/badge/🎥%20Demo-Video-blue?style=flat-square&logo=googledrive)](https://drive.google.com/file/d/1ZW7BgQtfA2e0FAoeO7jVf_ft_tItzPTR/view?usp=sharing)
 
 ## Overview
 
